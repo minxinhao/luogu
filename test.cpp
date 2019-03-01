@@ -1,183 +1,38 @@
-#include <cstdio>
 #include <iostream>
-#include <string>
 #include <string.h>
-#include <vector>
+#include <stdio.h>
 #include <algorithm>
-#include <math.h>
+#include <vector>
 using namespace std;
-const int maxn = 200;
-struct site
+int f[1000005],h[1000005],n;//f[i]表示i节点的父节点,
+                            //h[i]表示i节点及其子节点的连通块数
+char s[2][1005];//滚动数组
+int find(int x){return f[x]==x?x:f[x]=find(f[x]);}//查
+void unionn(int x,int y)//并
 {
-    long long x;
-    long long y;
-};
-std::vector<site> pro_horse;
-long long des_x , des_y ;
-long long horse_x , horse_y;
-long long dp[maxn][maxn];
-long long res = 0;
-
-int check_site(site temp)
-{
-    if (temp.x <0 || temp.x >20)
-    {
-        return 0 ;
-    }
-    if (temp.y <0 || temp.y >20)
-    {
-        return 0 ;
-    }
-    return 1;
+    int r1=find(x),r2=find(y);
+    if(r1!=r2)h[r1]+=h[r2],f[r2]=f[r1];
 }
-void get_pro_horse(long long horse_x ,long long horse_y)
+int main()
 {
-
-    site temp ;
-    temp.x = horse_x ;
-    temp.y = horse_y ;
-    pro_horse.push_back(temp);
-    /*
-    * check : horse_x - 2 , horse_y+-1
-    */
-    temp.x = horse_x - 2;
-    temp.y = horse_y - 1;
-    if(check_site(temp))
-    {
-        pro_horse.push_back(temp);
-    }
-    temp.y = horse_y + 1;
-    if(check_site(temp))
-    {
-        pro_horse.push_back(temp);
-    }
     
-    /*
-    * check : horse_x + 2 , horse_y+-1
-    */
-    temp.x = horse_x + 2;
-    if(check_site(temp))
+    int t;
+    scanf("%d%d",&n,&t);
+    for(int i=0;i<n;i++)
     {
-        pro_horse.push_back(temp);
-    }
-    temp.y = horse_y - 1;
-    if(check_site(temp))
-    {
-        pro_horse.push_back(temp);
-    }
-
-    /*
-    * check : horse_x-1 , horse_y+-2
-    */
-    temp.x = horse_x - 1;
-    temp.y = horse_y + 2;
-    if(check_site(temp))
-    {
-        pro_horse.push_back(temp);
-    }
-    temp.y = horse_y - 2;
-    if(check_site(temp))
-    {
-        pro_horse.push_back(temp);
-    }
-
-    /*
-    * check : horse_x+1 , horse_y+-2
-    */
-    temp.x = horse_x + 1;
-    temp.y = horse_y + 2;
-    if(check_site(temp))
-    {
-        pro_horse.push_back(temp);
-    }
-    temp.y = horse_y - 2;
-    if(check_site(temp))
-    {
-        pro_horse.push_back(temp);
-    }
-    return ;
-}
-int horse_arr(long long x, long long y)
-{
-    for (int i = 0; i < pro_horse.size(); ++i)
-    {
-        if (pro_horse[i].x == x && pro_horse[i].y==y)
+        scanf("%s",s[i&1]);
+        for(int j=0;j<n;j++)
         {
-            //printf("horse arrivable\n");
-            return 1;
+            f[i*n+j]=i*n+j,h[i*n+j]=1;//构造映射
+            if(i!=0&&s[(i-1)&1][j]!=s[i&1][j])unionn((i-1)*n+j,i*n+j);
+            if(j!=0&&s[i&1][j-1]!=s[i&1][j])unionn(i*n+j,i*n+j-1);
         }
     }
-    return 0 ;
-}
-void dfs(long long x , long long y)
-{
-
-    //printf("cur_x:%lld,cur_y:%lld\n",x ,y );
-    if (x==des_x && y==des_y)
+    int i,j;
+    while(t--)
     {
-        res++;
-        return ;
+        scanf("%d%d",&i,&j);
+        printf("%d\n",h[find((i-1)*n+j-1)]);
     }
-    if (  !horse_arr(x+1, y) && x<des_x)
-    {
-        dfs(x+1 , y);
-    }
-    if ( !horse_arr(x, y+1) && y<des_y )
-    {
-        dfs(x , y+1);
-    }
-    //printf("return\n");
-    return ;
-}
-int main(int argc, char const *argv[])
-{
-    //freopen("input.txt","r",stdin);
-    cin>>des_x>>des_y>>horse_x>>horse_y;
-    //cout<<des_x<<des_y<<horse_x<<horse_y<<endl;
-    memset(dp , 0 , sizeof(dp));
-    get_pro_horse(horse_x,horse_y);
-    
-    for (int i = 0; i < 21; ++i)
-    {
-        if (horse_arr(i,0))
-        {
-            dp[i][0]=0;
-        }
-        else
-        {
-            dp[i][0]=1;
-        }
-    }
-     
-    for (int i = 0; i < 21; ++i)
-    {
-        if (horse_arr(0,i))
-        {
-            dp[0][i]=0;
-        }
-        else
-        {
-            dp[0][i]=1;
-        }
-    }
-    for (int i = 1; i <=des_x; ++i)
-    {
-        for(int j = 1 ; j<=des_y;++j)
-        {
-           if (horse_arr(i,j))
-           {
-                dp[i][j]=0;
-           }
-           else
-           {
-                dp[i][j]= dp[i-1][j] + dp[i][j-1];
-           }
-        }
-    }
-    // for (int i = 0; i < pro_horse.size(); ++i)
-    // {
-    //     printf("%lld %lld\n",pro_horse[i].x,pro_horse[i].y );
-    // }
-    printf("%lld\n",dp[des_x][des_y] );
     return 0;
 }
