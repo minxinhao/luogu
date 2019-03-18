@@ -32,8 +32,8 @@ int bits[maxn];
 
 int main(int argc, char const *argv[])
 {
-    freopen("input.txt","r",stdin);
-    freopen("result.txt","w",stdout);
+    // freopen("input.txt","r",stdin);
+    // freopen("result.txt","w",stdout);
     int num ;
     scanf("%d",&num);
     int count = 0 ;
