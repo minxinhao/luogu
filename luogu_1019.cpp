@@ -15,6 +15,7 @@ const int maxn = 20;
 int num ;
 string words[2*maxn]  ;
 std::vector<string> Result;
+int res_len ;
 
 struct  node 
 {
@@ -31,7 +32,7 @@ int get_len(int x , int y)
 	int len_u = u.length(),len_v = v.length();
 	len_v = min(len_u,len_v) ;
 	int len = 1 ,flag = 0 ;
-	while(len<len_v)
+	while(len<len_v-1)
 	{
 		if (u.substr(len_u  - len , len) == v.substr(0 , len))
 		{
@@ -47,6 +48,8 @@ int get_len(int x , int y)
 		return 0 ;
 }
 
+
+
 void addegde(int u , int v)
 {
 	edge[edge_count].t  = v ;
@@ -55,6 +58,7 @@ void addegde(int u , int v)
 	head[u] = edge_count++ ;
 }
 
+
 void init()
 {
 	for (int i = num+1; i <= 2*num; ++i)
@@ -62,12 +66,15 @@ void init()
 		words[i] = words[i-num];
 	}
 	edge_count = 0 ;
-	memset(head ,  0 , sizeof(head));
+	res_len = 0 ;
+	memset(head ,  -1 , sizeof(head));
 	memset(vis ,  0 , sizeof(vis));
 
-	for (int i = 0; i <= 2*num; ++i)
+
+
+	for (int i = 1; i <= 2*num; ++i)
 	{
-		for(int j = 0; j <= 2*num ; ++j)
+		for(int j = 1; j <= 2*num ; ++j)
 		{
 			if (i==j)
 			{
@@ -75,46 +82,63 @@ void init()
 			}
 			else
 			{
-				if (get_len(i , j))
+				int len = get_len(i , j);
+				if ( len && len!=(int)min(words[i].length(),words[j].length()))
 				{
+					// printf("add  %d,%d ,len:%d, %s,%s\n",i , j,len, words[i].c_str(),words[j].c_str() );
 					addegde( i , j);
 				}
+				
 			}
 		}
 	}
-	for (int i = 0; i <= 2*num; ++i)
-	{
-		cout<<"i:"<<i<<" "<<words[i]<<endl;
-	}
+	// for (int i = 0; i <= 2*num; ++i)
+	// {
+	// 	cout<<"i:"<<i<<" "<<words[i]<<endl;
+	// }
 
 }
 
 void dfs(int root , string res)
 {
-	if (head[root] == 0 )
+	if (head[root] == -1  )
 	{
 		Result.push_back(res);
+		if (res.length()>res_len)
+		{
+			res_len = res.length();
+		}
 	}
 	vis[root] = 1;
 
-	printf("root:%d , words:%s\n",root , words[root].c_str());
-	for(int i = head[root]; i ; i = edge[i].next)
+	 // printf("root:%d , words:%s,next:%d\n",root , words[root].c_str(),edge[head[root]].t);
+	for(int i = head[root]; i!= -1 ; i = edge[i].next)
 	{
 		int t = edge[i].t ;
-		
+
 		if(!vis[t])
 		{	
 			string temp = words[t];
+			// cout<<res<<" "<<temp.substr(edge[i].len, temp.length() - edge[i].len  )<<" "<<res+temp.substr(edge[i].len , temp.length() - edge[i].len  )<<endl;
 			dfs(t , res+temp.substr(edge[i].len , temp.length() - edge[i].len  ));
 		}
+		else
+		{
+			Result.push_back(res);
+			if (res.length()>res_len)
+			{
+				res_len = res.length();
+			}
+		}
 	}
+	vis[root]=0;
 
 }
 
 int main(int argc, char const *argv[])
 {
-	freopen("input.txt","r",stdin);
-	freopen("result.txt","w",stdout);
+	// freopen("input.txt","r",stdin);
+	// freopen("result.txt","w",stdout);
 
 	scanf("%d",&num);
 	for (int i = 1 ; i <= num; ++i)
@@ -126,11 +150,21 @@ int main(int argc, char const *argv[])
 		
 	init();
 
-	dfs(0 , words[0]);
-
-	for (int i = 0; i < Result.size(); ++i)
+	for (int i = 1; i <= num; ++i)
 	{
-		cout<<Result[i]<<" "<<Result[i].length()<<endl;
+		memset(vis , 0 , sizeof(vis));
+		if (words[i].substr(0,1)==words[0])
+		{
+			// printf("new one\n");
+			dfs(i , words[i]);
+		}
+		
 	}
+
+	// for (int i = 0; i < Result.size(); ++i)
+	// {
+	// 	cout<<Result[i]<<" "<<Result[i].length()<<endl;
+	// }
+	printf("%d\n",res_len );
 	return 0;
 }
